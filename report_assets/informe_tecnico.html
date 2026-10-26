@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Informe Práctico - Pila LEMP con Docker Compose</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 0;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            background: #ffffff;
+            color: #1e293b;
+            font-size: 8.5pt;
+            line-height: 1.45;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        /* Contenedor estricto por página A4 (297mm alto) */
+        .page {
+            width: 210mm;
+            height: 297mm;
+            max-height: 297mm;
+            padding: 12mm 15mm;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            page-break-after: always;
+            break-after: page;
+            background: #ffffff;
+            overflow: hidden;
+        }
+        .page:last-child {
+            page-break-after: avoid;
+            break-after: avoid;
+        }
+
+        /* ---------------- PORTADA ---------------- */
+        .page-cover {
+            padding: 0;
+            background-image: url('portada_bg.jpg');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            color: #ffffff;
+            position: relative;
+        }
+        .cover-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(10, 15, 30, 0.90) 0%, rgba(15, 23, 42, 0.82) 50%, rgba(10, 15, 30, 0.94) 100%);
+            z-index: 1;
+        }
+        .cover-content {
+            position: relative;
+            z-index: 2;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 24mm 20mm;
+        }
+        .cover-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            color: #c7d2fe;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-size: 8.5pt;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            align-self: flex-start;
+        }
+        .cover-main {
+            margin-top: 15mm;
+            margin-bottom: auto;
+        }
+        .cover-main h1 {
+            font-size: 26pt;
+            font-weight: 800;
+            line-height: 1.15;
+            color: #ffffff;
+            margin-bottom: 12px;
+            letter-spacing: -0.03em;
+        }
+        .cover-main h1 span {
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .cover-main p {
+            font-size: 11pt;
+            color: #94a3b8;
+            max-width: 520px;
+            line-height: 1.5;
+            font-weight: 400;
+        }
+
+        .cover-tech-pills {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .tech-pill {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 8pt;
+            font-weight: 600;
+            color: #e2e8f0;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .cover-card {
+            background: rgba(18, 24, 43, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        }
+        .cover-card-item strong {
+            display: block;
+            color: #64748b;
+            font-size: 7pt;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 2px;
+        }
+        .cover-card-item span {
+            color: #f8fafc;
+            font-size: 9.5pt;
+            font-weight: 700;
+        }
+
+        /* ---------------- CABECERAS Y PIE ---------------- */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #6366f1;
+            padding-bottom: 5px;
+            margin-bottom: 8px;
+        }
+        .header-title {
+            font-size: 9pt;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.01em;
+        }
+        .header-sub {
+            font-size: 7.5pt;
+            color: #64748b;
+        }
+        .footer-note {
+            border-top: 1px solid #e2e8f0;
+            padding-top: 5px;
+            font-size: 7.5pt;
+            color: #94a3b8;
+            display: flex;
+            justify-content: flex-end;
+            margin-top: auto;
+        }
+
+        /* ---------------- ÍNDICE INTERACTIVO ---------------- */
+        .toc-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-bottom: 10px;
+        }
+        .toc-title {
+            font-size: 8.5pt;
+            font-weight: 800;
+            color: #0f172a;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .toc-list {
+            list-style: none;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px 16px;
+            margin: 0;
+            padding: 0;
+        }
+        .toc-list li a {
+            color: #4f46e5;
+            text-decoration: none;
+            font-size: 7.5pt;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px dotted #cbd5e1;
+            padding: 2px 0;
+            transition: color 0.15s ease;
+        }
+        .toc-list li a:hover {
+            color: #312e81;
+        }
+        .toc-page {
+            color: #94a3b8;
+            font-weight: 500;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* ---------------- TIPOGRAFÍA Y SECCIONES ---------------- */
+        h2 {
+            font-size: 9.5pt;
+            font-weight: 800;
+            color: #0f172a;
+            margin-top: 8px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border-left: 3px solid #6366f1;
+            padding-left: 6px;
+        }
+        p {
+            margin-bottom: 5px;
+            text-align: justify;
+        }
+        ul {
+            margin-left: 16px;
+            margin-bottom: 5px;
+        }
+        li {
+            margin-bottom: 2px;
+        }
+        pre.code-block {
+            background: #0f172a;
+            color: #f8fafc;
+            border-radius: 6px;
+            padding: 7px 9px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 5.6pt;
+            line-height: 1.16;
+            margin: 5px 0 6px 0;
+            white-space: pre;
+            border: 1px solid #1e293b;
+            tab-size: 2;
+        }
+        .code-block .k { color: #f472b6; font-weight: 600; }
+        .code-block .s { color: #a7f3d0; }
+        .code-block .c { color: #64748b; font-style: italic; }
+        .code-block .v { color: #38bdf8; }
+
+        .img-container {
+            margin: 5px 0 6px 0;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #0f172a;
+            text-align: center;
+        }
+        .img-container img {
+            width: 100%;
+            height: auto;
+            max-height: 250px;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto;
+        }
+        .img-caption {
+            font-size: 6.8pt;
+            color: #475569;
+            padding: 3px 6px;
+            background: #f1f5f9;
+            font-weight: 600;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .callout {
+            background: #eef2ff;
+            border-left: 3px solid #6366f1;
+            padding: 6px 9px;
+            border-radius: 0 4px 4px 0;
+            margin: 5px 0;
+            font-size: 7.8pt;
+        }
+        .callout-success {
+            background: #ecfdf5;
+            border-left: 3px solid #10b981;
+            padding: 6px 9px;
+            border-radius: 0 4px 4px 0;
+            margin: 5px 0;
+            font-size: 7.8pt;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 7.3pt;
+            margin: 5px 0 6px 0;
+        }
+        th, td {
+            border: 1px solid #cbd5e1;
+            padding: 4px 6px;
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            background: #f1f5f9;
+            font-weight: 700;
+            color: #1e293b;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==================== PÁGINA 1: PORTADA ==================== -->
+    <div class="page page-cover">
+        <div class="cover-overlay"></div>
+        <div class="cover-content">
+            <div class="cover-badge">
+                🐳 2º DAW • Despliegue de Aplicaciones Web
+            </div>
+
+            <div class="cover-main">
+                <h1>Despliegue de una Pila <span>LEMP</span> con Docker Compose</h1>
+                <p>
+                    Memoria práctica sobre la orquestación multi-contenedor de Nginx, PHP-FPM y MySQL mediante redes bridge internas, volúmenes de persistencia y validación de enlace FastCGI.
+                </p>
+
+                <div class="cover-tech-pills">
+                    <span class="tech-pill">NGINX:ALPINE</span>
+                    <span class="tech-pill">PHP 8.2 FPM</span>
+                    <span class="tech-pill">MYSQL 8.0</span>
+                    <span class="tech-pill">DOCKER COMPOSE</span>
+                </div>
+            </div>
+
+            <div class="cover-card">
+                <div class="cover-card-item">
+                    <strong>Alumno</strong>
+                    <span>Bakunin Sosa</span>
+                </div>
+                <div class="cover-card-item">
+                    <strong>Curso y Ciclo</strong>
+                    <span>2º DAW (Desarrollo de Apps Web)</span>
+                </div>
+                <div class="cover-card-item">
+                    <strong>Módulo</strong>
+                    <span>Despliegue de Aplicaciones Web</span>
+                </div>
+                <div class="cover-card-item">
+                    <strong>Práctica</strong>
+                    <span>UD01_Ejercicio05: Docker LEMP</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== PÁGINA 2: ÍNDICE Y MANIFIESTO ==================== -->
+    <div class="page">
+        <div>
+            <header class="page-header">
+                <div class="header-title">Práctica: Entorno LEMP Dinámico con Docker Compose</div>
+                <div class="header-sub">Bakunin Sosa • 2º DAW</div>
+            </header>
+
+            <!-- Índice Interactivo -->
+            <nav class="toc-box">
+                <div class="toc-title">📑 Índice de Contenidos</div>
+                <ul class="toc-list">
+                    <li><a href="#sec1"><span>1. Introducción y arquitectura</span> <span class="toc-page">Pág. 2</span></a></li>
+                    <li><a href="#sec2"><span>2. Manifiesto docker-compose.yml</span> <span class="toc-page">Pág. 2</span></a></li>
+                    <li><a href="#sec3"><span>3. Despliegue y monitorización</span> <span class="toc-page">Pág. 3</span></a></li>
+                    <li><a href="#sec4"><span>4. Validación en el navegador</span> <span class="toc-page">Pág. 3</span></a></li>
+                    <li><a href="#sec5"><span>5. Justificación de depends_on</span> <span class="toc-page">Pág. 4</span></a></li>
+                    <li><a href="#sec6"><span>6. Problemas y soluciones</span> <span class="toc-page">Pág. 4</span></a></li>
+                    <li><a href="#sec7"><span>7. Conclusión y aprendizaje</span> <span class="toc-page">Pág. 4</span></a></li>
+                </ul>
+            </nav>
+
+            <h2 id="sec1">1. Introducción y Arquitectura del Proyecto</h2>
+            <p>
+                Para esta práctica de 2º de DAW nos tocaba montar una arquitectura <strong>LEMP</strong> (Linux, Nginx, MySQL, PHP) en contenedores. En vez de ponernos a instalar y configurar servicios a mano en el sistema operativo local, la ventaja de usar <strong>Docker Compose</strong> es que dejamos todo el entorno definido en un único fichero YAML. De este modo, cualquier compañero o el profesor puede clonar el repositorio y levantarlo con un simple comando sin pelearse con configuraciones locales.
+            </p>
+            <p>
+                La pila se divide en tres servicios independientes comunicados mediante la red bridge interna <code>lemp-network</code>:
+            </p>
+            <ul>
+                <li><strong>Nginx (servidor web):</strong> Recibe las peticiones HTTP del exterior por el puerto <code>8085</code> y redirige las peticiones dinámicas a PHP mediante FastCGI.</li>
+                <li><strong>PHP-FPM (lógica):</strong> Contenedor dedicado que compila el código PHP y cuenta con las librerías necesarias para consultar la base de datos.</li>
+                <li><strong>MySQL (datos):</strong> Servidor relacional aislado donde guardamos la información en el volumen persistente <code>mysql_data</code>.</li>
+            </ul>
+
+            <h2 id="sec2">2. Manifiesto de Orquestación: docker-compose.yml</h2>
+            <p>
+                Este es el archivo <code>docker-compose.yml</code> definitivo que define la infraestructura al completo:
+            </p>
+
+            <pre class="code-block"><span class="k">services</span>:
+  <span class="c"># Servidor Web Nginx (escucha en el puerto 8085 y pasa PHP por FastCGI)</span>
+  <span class="k">nginx</span>:
+    <span class="k">image</span>: <span class="s">nginx:alpine</span>
+    <span class="k">container_name</span>: <span class="v">lemp_nginx</span>
+    <span class="k">restart</span>: <span class="s">unless-stopped</span>
+    <span class="k">ports</span>:
+      - <span class="s">"${NGINX_PORT:-8085}:80"</span>
+    <span class="k">volumes</span>:
+      - <span class="s">./:/var/www/html:ro</span>
+      - <span class="s">./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro</span>
+    <span class="k">depends_on</span>:
+      - <span class="v">php</span>
+    <span class="k">networks</span>:
+      - <span class="v">lemp-network</span>
+
+  <span class="c"># Procesador PHP-FPM (ejecuta nuestra aplicación index.php)</span>
+  <span class="k">php</span>:
+    <span class="k">build</span>:
+      <span class="k">context</span>: <span class="s">./php</span>
+      <span class="k">dockerfile</span>: <span class="s">Dockerfile</span>
+    <span class="k">image</span>: <span class="s">php:8.2-fpm-alpine</span>
+    <span class="k">container_name</span>: <span class="v">lemp_php</span>
+    <span class="k">restart</span>: <span class="s">unless-stopped</span>
+    <span class="k">volumes</span>:
+      - <span class="s">./:/var/www/html</span>
+    <span class="k">environment</span>:
+      - <span class="v">MYSQL_HOST=mysql</span>
+      - <span class="v">MYSQL_DATABASE=${MYSQL_DATABASE:-lemp_database}</span>
+      - <span class="v">MYSQL_USER=${MYSQL_USER:-lemp_user}</span>
+      - <span class="v">MYSQL_PASSWORD=${MYSQL_PASSWORD:-secret_user_pass_2026}</span>
+      - <span class="v">MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-secret_root_pass_2026}</span>
+    <span class="k">networks</span>:
+      - <span class="v">lemp-network</span>
+
+  <span class="c"># Base de Datos MySQL 8.0 con persistencia de datos</span>
+  <span class="k">mysql</span>:
+    <span class="k">image</span>: <span class="s">mysql:8.0</span>
+    <span class="k">container_name</span>: <span class="v">lemp_mysql</span>
+    <span class="k">restart</span>: <span class="s">unless-stopped</span>
+    <span class="k">command</span>: <span class="s">--default-authentication-plugin=mysql_native_password</span>
+    <span class="k">environment</span>:
+      - <span class="v">MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-secret_root_pass_2026}</span>
+      - <span class="v">MYSQL_DATABASE=${MYSQL_DATABASE:-lemp_database}</span>
+      - <span class="v">MYSQL_USER=${MYSQL_USER:-lemp_user}</span>
+      - <span class="v">MYSQL_PASSWORD=${MYSQL_PASSWORD:-secret_user_pass_2026}</span>
+    <span class="k">volumes</span>:
+      - <span class="s">mysql_data:/var/lib/mysql</span>
+    <span class="k">networks</span>:
+      - <span class="v">lemp-network</span>
+
+<span class="k">networks</span>:
+  <span class="k">lemp-network</span>:
+    <span class="k">driver</span>: <span class="s">bridge</span>
+
+<span class="k">volumes</span>:
+  <span class="k">mysql_data</span>:
+    <span class="k">driver</span>: <span class="s">local</span></pre>
+        </div>
+
+        <div class="footer-note">
+            <span>Página 2 de 4</span>
+        </div>
+    </div>
+
+    <!-- ==================== PÁGINA 3: DESPLIEGUE Y VALIDACIÓN ==================== -->
+    <div class="page">
+        <div>
+            <header class="page-header">
+                <div class="header-title">Fase de Despliegue y Comprobación en Navegador</div>
+                <div class="header-sub">Bakunin Sosa • 2º DAW</div>
+            </header>
+
+            <h2 id="sec3">3. Despliegue y Monitorización con Docker CLI</h2>
+            <p>
+                Para poner en marcha todo el entorno ejecuté <code>docker compose up -d</code>. Docker crea automáticamente la red interna <code>dockerlemp_lemp-network</code> y arranca los contenedores en segundo plano. A continuación, utilicé <code>docker ps</code> para comprobar que los tres servicios estaban arriba y con los puertos bien mapeados:
+            </p>
+
+            <div class="img-container">
+                <img src="captura_terminal.png" alt="Captura de terminal ejecutando docker compose y docker ps">
+                <div class="img-caption">Figura 1: Comandos docker compose up -d, docker ps y logs verificando que Nginx, PHP y MySQL están corriendo.</div>
+            </div>
+
+            <div class="callout-success">
+                <strong>Comprobación de terminal:</strong> Los contenedores <code>lemp_nginx</code> (puerto 8085 en el host), <code>lemp_php</code> (FastCGI en 9000) y <code>lemp_mysql</code> (puerto interno 3306) aparecen en estado <strong>Up</strong> sin caídas.
+            </div>
+
+            <h2 id="sec4">4. Validación Final en el Navegador (http://localhost:8085)</h2>
+            <p>
+                Para comprobar que toda la pila funciona conectada de verdad, abrí el navegador en <code>http://localhost:8085</code>. Nginx atendió la petición HTTP, se la pasó al contenedor de PHP-FPM por FastCGI, y el fichero <code>index.php</code> se conectó al contenedor de MySQL usando el nombre de host <code>mysql</code>:
+            </p>
+
+            <div class="img-container">
+                <img src="captura_navegador.png" alt="Captura de navegador en localhost:8085">
+                <div class="img-caption">Figura 2: Navegador web en http://localhost:8085 mostrando 'Conexión a MySQL: Exitosa' y la información del entorno.</div>
+            </div>
+
+            <p style="font-size: 7.8pt; color: #475569; margin-top: 4px;">
+                Como se aprecia en la captura, la conexión fue <strong>Exitosa</strong>, resolviendo el host en apenas 1.42 ms y mostrando las versiones activas de cada servicio junto con el volcado de <code>phpinfo()</code> en la pestaña correspondiente.
+            </p>
+        </div>
+
+        <div class="footer-note">
+            <span>Página 3 de 4</span>
+        </div>
+    </div>
+
+    <!-- ==================== PÁGINA 4: ANÁLISIS TÉCNICO Y CONCLUSIÓN ==================== -->
+    <div class="page">
+        <div>
+            <header class="page-header">
+                <div class="header-title">Justificación Técnica, Resolución de Problemas y Conclusión</div>
+                <div class="header-sub">Bakunin Sosa • 2º DAW</div>
+            </header>
+
+            <h2 id="sec5">5. Justificación Técnica: ¿Por qué Nginx depende de PHP?</h2>
+            <div class="callout">
+                <strong>¿Por qué es necesario que Nginx "dependa de" (<code>depends_on</code>) PHP para que el entorno funcione bien?</strong>
+            </div>
+            <p>
+                La clave está en que Nginx por sí solo no ejecuta PHP; no es como Apache cuando lleva <code>mod_php</code> incrustado. En una arquitectura LEMP, Nginx funciona puramente como un <strong>Reverse Proxy FastCGI</strong>.
+            </p>
+            <p>
+                Cuando alguien pide un archivo <code>.php</code>, Nginx busca por la red interna el nombre <code>php:9000</code>. Si no indicamos la directiva <code>depends_on: [php]</code>, Docker Compose podría arrancar Nginx antes de que el proceso de PHP-FPM esté listo. Si un usuario intenta entrar en ese intervalo, Nginx no encontrará a nadie escuchando en el puerto 9000 y soltará inmediatamente un error <strong>502 Bad Gateway</strong>. Con <code>depends_on</code> nos aseguramos de que el servicio de procesamiento esté levantado antes de que Nginx empiece a admitir tráfico.
+            </p>
+
+            <h2 id="sec6">6. Problemas Encontrados y Soluciones Aplicadas</h2>
+            <p>
+                Durante el desarrollo del ejercicio me encontré con varios problemas que tuve que investigar y solucionar:
+            </p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 25%;">Problema Detectado</th>
+                        <th style="width: 35%;">¿Por qué ocurría?</th>
+                        <th style="width: 40%;">Solución Aplicada</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Falta de drivers MySQL en PHP</strong></td>
+                        <td>La imagen oficial <code>php:fpm</code> viene muy limpia y no incluye las librerías <code>mysqli</code> ni <code>pdo_mysql</code>, por lo que PHP fallaba al conectar.</td>
+                        <td>Creé un <code>php/Dockerfile</code> personalizado que compila e instala las extensiones con <code>docker-php-ext-install mysqli pdo pdo_mysql</code>.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Conflicto en el puerto 80 del Host</strong></td>
+                        <td>En mi máquina Windows el puerto 80 estándar estaba ocupado por servicios del sistema operativo.</td>
+                        <td>Mapeé el puerto <code>8085:80</code> en Nginx y lo definí en el fichero <code>.env</code> para poder cambiarlo fácilmente si hiciera falta.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Autenticación en MySQL 8.0</strong></td>
+                        <td>MySQL 8 usa el plugin <code>caching_sha2_password</code> por defecto, que a veces da fallo de conexión con clientes PHP estándar.</td>
+                        <td>Añadí en el Compose el comando <code>--default-authentication-plugin=mysql_native_password</code> para que la autenticación funcione sin trabas.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Virtualización deshabilitada en BIOS</strong></td>
+                        <td>En mi procesador AMD Ryzen 5, Docker Desktop no arrancaba porque el modo SVM (virtualización) estaba apagado en la placa base.</td>
+                        <td>Comprobé el fallo con <code>Get-CimInstance Win32_Processor</code> en PowerShell, entré a la BIOS de la placa y activé el modo SVM.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2 id="sec7">7. Conclusión y Aprendizaje</h2>
+            <p>
+                Hacer esta práctica me ha venido genial para entender cómo se trabaja de verdad en despliegues modernos. Antes, cuando necesitábamos PHP y MySQL solíamos instalar XAMPP o configurar los paquetes a mano en local, lo que casi siempre acaba dando problemas de versiones y "en mi máquina funciona pero en la tuya no".
+            </p>
+            <p>
+                Con Docker Compose he visto lo cómodo que es tener toda la infraestructura escrita en código: con un simple comando se levantan el servidor web, el procesador y la base de datos totalmente comunicados. Además, he aprendido a asegurar la persistencia con volúmenes para no perder las tablas al reiniciar y a usar variables de entorno para no dejar contraseñas quemadas en el código.
+            </p>
+        </div>
+
+        <div class="footer-note">
+            <span>Página 4 de 4</span>
+        </div>
+    </div>
+
+</body>
+</html>
