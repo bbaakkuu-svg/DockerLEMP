@@ -269,3 +269,83 @@ Si todo ha ido bien, verás la tarjeta de estado en verde con el mensaje **Conex
      NGINX_PORT=8090
      ```
      Y vuelve a levantar con `docker compose up -d`.
+
+## 📦 Paso 9: Optimización y Buenas Prácticas
+
+- **Imágenes ligeras**: Usa la variante `-alpine` siempre que sea posible; reduce el tamaño de la capa y acelera el despliegue.
+- **Cache de dependencias**: En el `Dockerfile` de PHP, separa la instalación de extensiones de la copia del código fuente para que Docker pueda cachear la capa de compilación.
+- **Variables de entorno secretas**: Nunca comprometas el archivo `.env` a repositorios públicos. Añade `*.env` al `.gitignore` y usa `docker secret` o un gestor de secretos en producción.
+- **Healthchecks**: Añade la directiva `healthcheck` en `docker-compose.yml` para que Docker supervise que PHP y MySQL estén realmente operativos antes de marcar el contenedor como `healthy`.
+
+```yaml
+  php:
+    healthcheck:
+      test: ["CMD", "php", "-r", "'exit(0);'"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+```
+
+## 📚 Paso 10: Documentación y Versionado
+
+1. **README.md** – Mantén una tabla de contenidos, instrucciones de arranque y ejemplos de uso.
+2. **Changelog** – Registra cambios en la configuración del stack (p.ej., versiones de MySQL, PHP o cambios de puertos).
+3. **Git** – Commitea cada paso significativo; usa mensajes claros como `feat: add PHP Dockerfile with MySQL extensions`.
+
+## 🧹 Paso 11: Limpieza de recursos
+
+- Para **detener y eliminar** los contenedores, volúmenes y redes creadas:
+  ```bash
+  docker compose down -v --remove-orphans
+  ```
+- Si quieres **purgar todas las imágenes** construidas localmente:
+  ```bash
+  docker image prune -a
+  ```
+- Elimina la carpeta `mysql_data` sólo si estás seguro de que no necesitas los datos persistidos.
+
+## 🚀 Conclusión
+
+¡Listo! Ahora tienes una pila **LEMP** totalmente operativa, modular y preparada para escalar. Con Docker Compose, puedes borrar y volver a levantar el entorno en segundos, lo que facilita pruebas, desarrollo y despliegues en entornos de producción. Recuerda revisar los logs (`docker compose logs -f`) cuando algo no funcione y aplicar las buenas prácticas de seguridad y optimización que acabamos de ver.
+
+> **Tip**: Si quieres experimentar, añade un nuevo servicio (Redis, phpMyAdmin, etc.) al mismo `docker‑compose.yml`; Docker se encargará de la orquestación sin que tengas que tocar la configuración de Nginx.
+
+## 📦 Paso 9: Optimización y Buenas Prácticas
+
+- **Imágenes ligeras**: Usa la variante `-alpine` siempre que sea posible; reduce el tamaño de la capa y acelera el despliegue.
+- **Cache de dependencias**: En el `Dockerfile` de PHP, separa la instalación de extensiones de la copia del código fuente para que Docker pueda cachear la capa de compilación.
+- **Variables de entorno secretas**: Nunca comprometas el archivo `.env` a repositorios públicos. Añade `*.env` al `.gitignore` y usa `docker secret` o un gestor de secretos en producción.
+- **Healthchecks**: Añade la directiva `healthcheck` en `docker-compose.yml` para que Docker supervise que PHP y MySQL estén realmente operativos antes de marcar el contenedor como `healthy`.
+
+```yaml
+  php:
+    healthcheck:
+      test: ["CMD", "php", "-r", "'exit(0);'"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+```
+
+## 📚 Paso 10: Documentación y Versionado
+
+1. **README.md** – Mantén una tabla de contenidos, instrucciones de arranque y ejemplos de uso.
+2. **Changelog** – Registra cambios en la configuración del stack (p.ej., versiones de MySQL, PHP o cambios de puertos).
+3. **Git** – Commitea cada paso significativo; usa mensajes claros como `feat: add PHP Dockerfile with MySQL extensions`.
+
+## 🧹 Paso 11: Limpieza de recursos
+
+- Para **detener y eliminar** los contenedores, volúmenes y redes creadas:
+  ```bash
+  docker compose down -v --remove-orphans
+  ```
+- Si quieres **purgar todas las imágenes** construidas localmente:
+  ```bash
+  docker image prune -a
+  ```
+- Elimina la carpeta `mysql_data` sólo si estás seguro de que no necesitas los datos persistidos.
+
+## 🚀 Conclusión
+
+¡Listo! Ahora tienes una pila **LEMP** totalmente operativa, modular y preparada para escalar. Con Docker Compose, puedes borrar y volver a levantar el entorno en segundos, lo que facilita pruebas, desarrollo y despliegues en entornos de producción. Recuerda revisar los logs (`docker compose logs -f`) cuando algo no funcione y aplicar las buenas prácticas de seguridad y optimización que acabamos de ver.
+
+> **Tip**: Si quieres experimentar, añade un nuevo servicio (Redis, phpMyAdmin, etc.) al mismo `docker‑compose.yml`; Docker se encargará de la orquestación sin que tengas que tocar la configuración de Nginx.
